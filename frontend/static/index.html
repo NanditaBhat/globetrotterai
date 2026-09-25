@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlobeTrotter AI — Travel & Experience Concierge</title>
+<!-- Google Fonts & Material Symbols -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined">
+<style>
+  :root {
+    --accent: #0284c7;
+    --accent-hover: #0369a1;
+    --accent-light: #e0f2fe;
+    --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --card-bg: #ffffff;
+    --chat-bg: #f8fafc;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --border: #e2e8f0;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Main Wrapper */
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
+    height: 95vh;
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin: 1rem;
+  }
+
+  /* Header */
+  header {
+    background: linear-gradient(135deg, #0284c7 0%, #0f766e 100%);
+    color: #ffffff;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  header .subtitle {
+    font-size: 0.85rem;
+    opacity: 0.9;
+    font-weight: 400;
+    margin-left: auto;
+  }
+
+  /* Chat Log */
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: var(--chat-bg);
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+
+  /* Message Rows */
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: fadeIn 0.25s ease-out forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user {
+    align-self: flex-end;
+    align-items: flex-end;
+  }
+  .msg.agent {
+    align-self: flex-start;
+    align-items: flex-start;
+  }
+
+  .msg-author {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  /* Message Bubbles */
+  .bubble {
+    padding: 0.85rem 1.1rem;
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    line-height: 1.5;
+    font-size: 0.98rem;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg.user .bubble {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    border: none;
+    border-bottom-right-radius: 2px;
+  }
+
+  .msg.agent .bubble {
+    border-bottom-left-radius: 2px;
+  }
+
+  /* Rich A2UI Cards */
+  .bubble.rich {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  /* Prompt Chips Bar */
+  .chips-container {
+    padding: 0.75rem 1.2rem;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+  }
+  .chips-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .chip {
+    background: var(--accent-light);
+    color: var(--accent);
+    border: 1px solid rgba(2, 132, 199, 0.2);
+    border-radius: 20px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.83rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+  .chip:hover {
+    background: var(--accent);
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(2, 132, 199, 0.2);
+  }
+
+  /* Input Form */
+  form {
+    display: flex;
+    gap: 0.6rem;
+    padding: 1rem 1.2rem;
+    background: #ffffff;
+    border-top: 1px solid var(--border);
+  }
+  input {
+    flex: 1;
+    padding: 0.8rem 1.1rem;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 0.98rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+  }
+  button {
+    padding: 0.8rem 1.4rem;
+    border: none;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.98rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+  }
+  button:hover {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.3);
+  }
+
+  /* --- A2UI Component Styles --- */
+  .a2card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1.1rem;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    max-width: 100%;
+  }
+  .a2card + .a2card, .a2col > .a2card { margin-top: 0.6rem; }
+  .a2col { display: flex; flex-direction: column; gap: 0.5rem; }
+  .a2row { display: flex; flex-direction: row; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .a2row.between { justify-content: space-between; }
+  .a2text { margin: 0; line-height: 1.45; }
+  .a2text.a2-h1 { font-size: 1.45rem; font-weight: 700; color: var(--text-primary); }
+  .a2text.a2-h2 { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
+  .a2text.a2-h3 { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); }
+  .a2text.a2-h4 { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+  .a2text.a2-caption { font-size: 0.85rem; color: var(--text-secondary); }
+  .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; width: 100%; }
+  .a2img { max-width: 100%; border-radius: var(--radius-sm); display: block; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+  .material-symbols-outlined { font-family: 'Material Symbols Outlined'; font-size: 1.25rem; line-height: 1; vertical-align: middle; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <header>
+    <h1><span class="material-symbols-outlined" style="color:#fff; font-size:1.6rem;">travel_explore</span> GlobeTrotter AI</h1>
+    <span class="subtitle">Travel & Experience Concierge</span>
+  </header>
+
+  <div id="log"></div>
+
+  <!-- Prompt Chips Bar -->
+  <div class="chips-container">
+    <span class="chips-title">Try asking:</span>
+    <button type="button" class="chip" data-prompt="Show me Paris with weather and a scenic photo">🗼 Paris Overview & Photo</button>
+    <button type="button" class="chip" data-prompt="Calculate budget for a 7-day trip to Tokyo for 2 people">💴 7-Day Tokyo Budget</button>
+    <button type="button" class="chip" data-prompt="Find nearby tourist attractions in San Francisco">🌉 SF Attractions</button>
+  </div>
+
+  <form id="form">
+    <input id="input" placeholder="Ask about destinations, weather, budgets, or generate travel scenes..." autocomplete="off" autofocus>
+    <button type="submit">
+      <span>Send</span>
+      <span class="material-symbols-outlined" style="color:#fff; font-size:1.1rem;">send</span>
+    </button>
+  </form>
+</div>
+
+<script>
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function bubble(who) {
+  const m = el("div", "msg " + who);
+  const author = el("div", "msg-author", who === "user" ? "👤 You" : "✈️ GlobeTrotter AI");
+  const b = el("div", "bubble");
+  m.appendChild(author);
+  m.appendChild(b);
+  log.appendChild(m);
+  log.scrollTop = log.scrollHeight;
+  return b;
+}
+
+/* ----------------------------------------------------------------------------
+ * A2UI mini-renderer (v0.8 Basic Catalog subset)
+ * Renders Card / Column / Row / Text / Divider / List / Image / Icon.
+ * -------------------------------------------------------------------------- */
+
+function boundStr(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v.literalString === "string") return v.literalString;
+  return "";
+}
+
+function childIds(props) {
+  const ids = [];
+  if (props && typeof props.child === "string") ids.push(props.child);
+  const ch = props && props.children;
+  if (ch && Array.isArray(ch.explicitList)) for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+  return ids;
+}
+
+function iconName(n) { return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase(); }
+
+function buildNode(id, comps, seen) {
+  if (!id || seen.has(id)) return null;
+  seen.add(id);
+  const spec = comps[id];
+  if (!spec || typeof spec !== "object") return null;
+  const type = Object.keys(spec)[0];
+  const props = spec[type] || {};
+  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+  switch (type) {
+    case "Card": {
+      const d = el("div", "a2card"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Column":
+    case "List": {
+      const horizontal = type === "List" && props.direction === "horizontal";
+      const d = el("div", horizontal ? "a2row" : "a2col"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Row": {
+      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+      kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Text": {
+      const t = el("div", "a2text");
+      const hint = String(props.usageHint || "body").toLowerCase();
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
+      else if (hint === "caption") t.classList.add("a2-caption");
+      t.textContent = boundStr(props.text);
+      return t;
+    }
+    case "Divider":
+      return el("hr", "a2divider");
+    case "Image": {
+      const src = boundStr(props.url || props.src);
+      if (!/^https?:\/\//i.test(src)) return null;
+      const img = el("img", "a2img"); img.src = src; img.alt = boundStr(props.alt) || ""; return img;
+    }
+    case "Icon": {
+      const s = el("span", "material-symbols-outlined"); s.textContent = iconName(boundStr(props.name) || props.name); return s;
+    }
+    default:
+      return null;
+  }
+}
+
+function renderSurface(messages, container) {
+  const comps = {};
+  const roots = [];
+  for (const m of messages) {
+    if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.id && c.component) comps[c.id] = c.component;
+  }
+  let rootIds = roots.filter(r => comps[r]);
+  if (rootIds.length === 0) {
+    const referenced = new Set();
+    for (const id in comps) { const spec = comps[id]; childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c)); }
+    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+  }
+  let drew = false;
+  for (const rid of rootIds) { const node = buildNode(rid, comps, new Set()); if (node) { container.appendChild(node); drew = true; } }
+  return drew;
+}
+
+function flattenText(messages) {
+  const out = [];
+  for (const m of messages) {
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
+  }
+  return out.join("\n").trim();
+}
+
+function renderReply(b, parts) {
+  b.textContent = "";
+  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+  const textStr = texts.join("\n").trim();
+  if (textStr) b.appendChild(el("div", null, textStr));
+
+  if (a2ui.length) {
+    b.classList.add("rich");
+    if (!renderSurface(a2ui, b)) b.appendChild(el("div", null, flattenText(a2ui) || "(no card content)"));
+  }
+  if (!b.childNodes.length) b.textContent = "(no response)";
+  log.scrollTop = log.scrollHeight;
+}
+
+async function sendPrompt(text) {
+  if (!text) return;
+  bubble("user").textContent = text;
+  input.value = "";
+  const b = bubble("agent"); b.textContent = "Thinking & preparing travel details…";
+  try {
+    const res = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text }) });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error(`Server returned non-JSON (HTTP ${res.status}). ${raw.slice(0, 300)}`); }
+    renderReply(b, data.parts || []);
+  } catch (e) {
+    b.textContent = "Error: " + e.message;
+  }
+}
+
+form.addEventListener("submit", (ev) => {
+  ev.preventDefault();
+  sendPrompt(input.value.trim());
+});
+
+// Clickable Prompt Chips
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    const promptText = chip.getAttribute("data-prompt");
+    sendPrompt(promptText);
+  });
+});
+</script>
+</body>
+</html>
